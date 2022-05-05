@@ -1,30 +1,20 @@
-package controllers
+package io_services
 
 import (
 	"encoding/csv"
 	"errors"
 	"fmt"
 	"jmc/bootcamp/models"
-	"net/http"
 	"os"
-
-	"github.com/gin-gonic/gin"
 )
 
-func GetPokemons(c *gin.Context) {
-	pokemonList, err := readCsvFile()
-
-	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, pokemonList)
+type CsvService struct {
+  PathFile string
 }
 
-func readCsvFile() (pokemonList []models.Pokemon, err error) {
+func (srv CsvService)ReadFromService() (pokemonList []models.Pokemon, err error) {
 
-	csvFile, err := os.Open("assets/pokemon-data.csv")
+	csvFile, err := os.Open(srv.PathFile)
 	if err != nil {
 		fmt.Println(err)
 		return nil, errors.New("Error try to open the CSV")
@@ -62,3 +52,5 @@ func readCsvFile() (pokemonList []models.Pokemon, err error) {
 
 	return pokemonList, nil
 }
+
+
