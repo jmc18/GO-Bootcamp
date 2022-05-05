@@ -1,4 +1,4 @@
-package BookModel
+package models
 
 type Book struct {
 	ID       string `json:"id"`

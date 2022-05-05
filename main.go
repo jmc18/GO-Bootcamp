@@ -1,11 +1,9 @@
 package main
 
 import (
-	BookRoutes "jmc/bootcamp/routes"
+	"jmc/bootcamp/routes"
 )
 
-
-
 func main() {
-	BookRoutes.Routes()
+	routes.Routes()
 }

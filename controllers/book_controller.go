@@ -4,20 +4,19 @@ import (
 	"errors"
 	"net/http"
 
-	BookModel "jmc/bootcamp/models"
+	"jmc/bootcamp/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-
 func GetBooks(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, BookModel.ArrayBooks)
+	c.IndentedJSON(http.StatusOK, models.ArrayBooks)
 }
 
-func getBookById(id string) (*BookModel.Book, error) {
-	for i, b := range BookModel.ArrayBooks {
+func getBookById(id string) (*models.Book, error) {
+	for i, b := range models.ArrayBooks {
 		if b.ID == id {
-			return &BookModel.ArrayBooks[i], nil
+			return &models.ArrayBooks[i], nil
 		}
 	}
 
@@ -37,13 +36,13 @@ func BookById(c *gin.Context) {
 }
 
 func CreateBook(c *gin.Context) {
-	var newBook BookModel.Book
+	var newBook models.Book
 
 	if err := c.BindJSON(&newBook); err != nil {
 		return
 	}
 
-	BookModel.ArrayBooks = append(BookModel.ArrayBooks, newBook)
+	models.ArrayBooks = append(models.ArrayBooks, newBook)
 	c.IndentedJSON(http.StatusCreated, newBook)
 }
 
@@ -62,7 +61,7 @@ func ChecoutBook(c *gin.Context) {
 		return
 	}
 
-	if  book.Quantity <= 0 {
+	if book.Quantity <= 0 {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Book not available."})
 		return
 	}
