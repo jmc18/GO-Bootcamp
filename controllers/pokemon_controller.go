@@ -14,7 +14,7 @@ func GetPokemons(c *gin.Context) {
 	pokemonList, err := _ioService.ReadFromService()
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err})
 		return
 	}
 

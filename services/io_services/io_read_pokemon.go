@@ -2,7 +2,6 @@ package io_services
 
 import (
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"jmc/bootcamp/models"
 	"os"
@@ -16,8 +15,7 @@ func (srv CsvService)ReadFromService() (pokemonList []models.Pokemon, err error)
 
 	csvFile, err := os.Open(srv.PathFile)
 	if err != nil {
-		fmt.Println(err)
-		return nil, errors.New("Error try to open the CSV")
+		return nil, fmt.Errorf("error try to open the CSV file (%v): %v", srv.PathFile, err)
 	}
 
 	defer csvFile.Close()
@@ -25,8 +23,11 @@ func (srv CsvService)ReadFromService() (pokemonList []models.Pokemon, err error)
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
 
 	if err != nil {
-		fmt.Println(err)
-		return nil, errors.New("Error try to read the CSV")
+		return nil, fmt.Errorf("error try to read the CSV file (%v): %v", srv.PathFile, err)
+	}
+
+	if len(csvLines) <= 0 {
+		return nil, fmt.Errorf("csv file (%v) is empty", srv.PathFile)
 	}
 
 	pokemonList = []models.Pokemon{}
@@ -46,7 +47,6 @@ func (srv CsvService)ReadFromService() (pokemonList []models.Pokemon, err error)
 			Generation: line[11],
 			Legendary:  line[12],
 		}
-		fmt.Println(pokemon)
 		pokemonList = append(pokemonList, pokemon)
 	}
 
