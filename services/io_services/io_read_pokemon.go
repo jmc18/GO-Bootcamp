@@ -8,7 +8,8 @@ import (
 )
 
 type CsvService struct {
-	PathFile string
+	PathFile  string
+	PokemonId string
 }
 
 func closeFile(file os.File) {
@@ -38,23 +39,30 @@ func (srv CsvService) ReadFromService() (pokemonList []models.Pokemon, err error
 	}
 
 	pokemonList = []models.Pokemon{}
-	for _, line := range csvLines {
-		pokemon := models.Pokemon{
-			ID:         line[0],
-			Name:       line[1],
-			Type1:      line[2],
-			Type2:      line[3],
-			Total:      line[4],
-			HP:         line[5],
-			Attack:     line[6],
-			Defense:    line[7],
-			SpAtk:      line[8],
-			SpDef:      line[9],
-			Speed:      line[10],
-			Generation: line[11],
-			Legendary:  line[12],
+	for i, line := range csvLines {
+		if i > 0 {
+			pokemon := models.Pokemon{
+				ID:         line[0],
+				Name:       line[1],
+				Type1:      line[2],
+				Type2:      line[3],
+				Total:      line[4],
+				HP:         line[5],
+				Attack:     line[6],
+				Defense:    line[7],
+				SpAtk:      line[8],
+				SpDef:      line[9],
+				Speed:      line[10],
+				Generation: line[11],
+				Legendary:  line[12],
+			}
+			if len(srv.PokemonId) > 0 && pokemon.ID == srv.PokemonId {
+				pokemonList = nil
+				pokemonList = append(pokemonList, pokemon)
+				return pokemonList, nil
+			}
+			pokemonList = append(pokemonList, pokemon)
 		}
-		pokemonList = append(pokemonList, pokemon)
 	}
 
 	return pokemonList, nil

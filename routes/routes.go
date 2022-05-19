@@ -9,5 +9,6 @@ import (
 func Routes() {
 	router := gin.Default()
 	router.GET("/pokemons", controllers.GetPokemons)
+	router.GET("/pokemon/:pokemonId", controllers.GetPokemonById)
 	router.Run("localhost:1213")
 }
