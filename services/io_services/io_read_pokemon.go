@@ -8,17 +8,24 @@ import (
 )
 
 type CsvService struct {
-  PathFile string
+	PathFile string
 }
 
-func (srv CsvService)ReadFromService() (pokemonList []models.Pokemon, err error) {
+func closeFile(file os.File) {
+	err := file.Close()
+	if err != nil {
+		fmt.Errorf("file cannot be closed: %v", err)
+	}
+}
+
+func (srv CsvService) ReadFromService() (pokemonList []models.Pokemon, err error) {
 
 	csvFile, err := os.Open(srv.PathFile)
 	if err != nil {
 		return nil, fmt.Errorf("error try to open the CSV file (%v): %v", srv.PathFile, err)
 	}
 
-	defer csvFile.Close()
+	defer closeFile(*csvFile)
 
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
 
@@ -52,5 +59,3 @@ func (srv CsvService)ReadFromService() (pokemonList []models.Pokemon, err error)
 
 	return pokemonList, nil
 }
-
-
