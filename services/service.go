@@ -1,7 +1,11 @@
 package services
 
-import "jmc/bootcamp/models"
+import (
+	"jmc/bootcamp/models"
+)
 
 type IIoService interface {
-	ReadFromService() (pokemonList []models.Pokemon, err error)
+	
+	GetAll() (pokemonList map[int]models.Pokemon, err error)
+	GetById(int) (pokemon models.Pokemon, err error)
 }

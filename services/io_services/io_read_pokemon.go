@@ -4,26 +4,34 @@ import (
 	"encoding/csv"
 	"fmt"
 	"jmc/bootcamp/models"
+	"jmc/bootcamp/services"
+	"log"
 	"os"
+	"strconv"
 )
 
 type CsvService struct {
-	PathFile  string
-	PokemonId string
+	pathFile  string
+	data map[int]models.Pokemon
 }
 
-func closeFile(file os.File) {
-	err := file.Close()
-	if err != nil {
-		fmt.Errorf("file cannot be closed: %v", err)
+func NewCsvService(pathFile string) (services.IIoService, error) {
+	srv := CsvService{
+		pathFile: pathFile,
+		data: make(map[int]models.Pokemon),
 	}
+	err := srv.LoadData()
+
+	if err != nil {
+		return nil, err
+	}
+	return &srv, nil
 }
 
-func (srv CsvService) ReadFromService() (pokemonList []models.Pokemon, err error) {
-
-	csvFile, err := os.Open(srv.PathFile)
+func (srv *CsvService) LoadData() (err error) {
+	csvFile, err := os.Open(srv.pathFile)
 	if err != nil {
-		return nil, fmt.Errorf("error try to open the CSV file (%v): %v", srv.PathFile, err)
+		return fmt.Errorf("error try to open the CSV file (%v): %v", srv.pathFile, err)
 	}
 
 	defer closeFile(*csvFile)
@@ -31,18 +39,25 @@ func (srv CsvService) ReadFromService() (pokemonList []models.Pokemon, err error
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
 
 	if err != nil {
-		return nil, fmt.Errorf("error try to read the CSV file (%v): %v", srv.PathFile, err)
+		return fmt.Errorf("error try to read the CSV file (%v): %v", srv.pathFile, err)
 	}
 
 	if len(csvLines) <= 0 {
-		return nil, fmt.Errorf("csv file (%v) is empty", srv.PathFile)
+		return fmt.Errorf("csv file (%v) is empty", srv.pathFile)
 	}
 
-	pokemonList = []models.Pokemon{}
+	pokemonList := make(map[int]models.Pokemon)
 	for i, line := range csvLines {
-		if i > 0 {
+		if i == 0 {
+			continue
+		}
+		pokemonId, err := strconv.Atoi(line[0])
+		if err != nil {
+				log.Printf("the pokemon with ID (%v) can't be parse", line[0])
+				continue
+		}
 			pokemon := models.Pokemon{
-				ID:         line[0],
+				ID:         pokemonId,
 				Name:       line[1],
 				Type1:      line[2],
 				Type2:      line[3],
@@ -56,14 +71,46 @@ func (srv CsvService) ReadFromService() (pokemonList []models.Pokemon, err error
 				Generation: line[11],
 				Legendary:  line[12],
 			}
-			if len(srv.PokemonId) > 0 && pokemon.ID == srv.PokemonId {
-				pokemonList = nil
-				pokemonList = append(pokemonList, pokemon)
-				return pokemonList, nil
-			}
-			pokemonList = append(pokemonList, pokemon)
+			pokemonList[i] = pokemon
+		}
+		srv.data = pokemonList
+		return nil
+}
+
+func closeFile(file os.File) {
+	err := file.Close()
+	if err != nil {
+		fmt.Errorf("file cannot be closed: %v", err)
+	}
+}
+
+func (srv *CsvService) GetAll() (pokemonList map[int]models.Pokemon, err error) {
+
+	if srv.data == nil {
+		err = srv.LoadData()
+		if err != nil{
+			return
 		}
 	}
 
-	return pokemonList, nil
+	return srv.data, nil
+}
+
+
+func (srv *CsvService) GetById(pokemonId int ) (models.Pokemon, error) {
+	if srv.data == nil {
+		err := srv.LoadData()
+		if err != nil{
+			return models.Pokemon{}, err
+		}
+	}
+
+	pokemon, ok := srv.data[pokemonId]
+
+	if !ok {
+		return models.Pokemon{}, fmt.Errorf("pokemon with ID [%v] not found", pokemonId)
+	}
+
+	return pokemon, nil
+
 }

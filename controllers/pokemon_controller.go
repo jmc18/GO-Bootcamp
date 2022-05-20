@@ -5,15 +5,25 @@ import (
 	"jmc/bootcamp/services/io_services"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-var _ioService services.IIoService = io_services.CsvService{PathFile: "assets/pokemon-data.csv", PokemonId: ""}
+const path = "assets/pokemon-data.csv"
+
+var _ioService services.IIoService
+
+func init(){
+	ioService, err := io_services.NewCsvService(path)
+	if err != nil {
+		log.Fatalf("the services can't be initialized (%v)", err)
+	}
+	_ioService = ioService
+}
 
 func GetPokemons(c *gin.Context) {
-	_ioService = io_services.CsvService{PathFile: "assets/pokemon-data.csv", PokemonId: ""}
-	pokemonList, err := _ioService.ReadFromService()
+	pokemonList, err := _ioService.GetAll()
 
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err})
@@ -25,9 +35,11 @@ func GetPokemons(c *gin.Context) {
 }
 
 func GetPokemonById(c *gin.Context) {
-	pokemonId := c.Param("pokemonId")
-	_ioService = io_services.CsvService{PathFile: "assets/pokemon-data.csv", PokemonId: pokemonId}
-	pokemonList, err := _ioService.ReadFromService()
+	pokemonId, err := strconv.Atoi(c.Param("pokemonId"))
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
+	}
+	pokemonList, err := _ioService.GetById(pokemonId)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err})
