@@ -80,7 +80,7 @@ func (srv *CsvService) LoadData() (err error) {
 func closeFile(file os.File) {
 	err := file.Close()
 	if err != nil {
-		fmt.Errorf("file cannot be closed: %v", err)
+		log.Printf("file cannot be closed: %v", err)
 	}
 }
 
